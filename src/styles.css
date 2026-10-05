@@ -1,6 +1,6 @@
-/* Tokens. The palette is grayscale on purpose: hierarchy comes from weight,
-   size and contrast, and "over target" is marked with a stripe pattern
-   instead of a color. */
+/* Tokens. Grayscale with one accent: orange marks progress (meters, the
+   goal bar, the weight trend and the active tab) and nothing else.
+   "Over target" is marked with a stripe pattern instead of a color. */
 :root {
   --bg: #f6f6f6;
   --surface: #ffffff;
@@ -11,6 +11,7 @@
   --track: #ebebeb;
   --btn: #111111;
   --btn-ink: #ffffff;
+  --accent: #d9790b;
   --stripe: repeating-linear-gradient(-45deg, var(--ink) 0 4px, var(--ink-3) 4px 8px);
   --font: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --num: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
@@ -30,6 +31,7 @@
     --track: #232323;
     --btn: #f2f2f2;
     --btn-ink: #0b0b0b;
+    --accent: #e8892a;
   }
 }
 
@@ -245,7 +247,7 @@ h2 {
 }
 
 .meter-fill {
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .meter-track .meter-fill.over {
@@ -540,7 +542,7 @@ h2 {
 
 .chart .avg {
   fill: none;
-  stroke: var(--ink);
+  stroke: var(--accent);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -610,7 +612,7 @@ h2 {
 .nudge {
   font-weight: 500;
   padding-left: 10px;
-  border-left: 3px solid var(--ink);
+  border-left: 3px solid var(--accent);
 }
 
 .set-row {
@@ -698,7 +700,7 @@ h2 {
 .working {
   height: 6px;
   border-radius: 3px;
-  background: var(--ink);
+  background: var(--accent);
   transform-origin: left;
 }
 
@@ -885,7 +887,7 @@ h2 {
 
 .goal-fill {
   height: 100%;
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .goal-ends {
@@ -930,6 +932,7 @@ h2 {
 }
 
 .tab.active svg {
+  color: var(--accent);
   stroke-width: 2.2;
 }
 
