@@ -7,7 +7,7 @@ import Auth from './pages/Auth'
 import Today from './pages/Today'
 import Weight from './pages/Weight'
 import Workout from './pages/Workout'
-import Settings from './pages/Settings'
+import Profile from './pages/Profile'
 
 const LAST_USER = 'hiwa:lastUser'
 const LOCAL_USER = { id: 'local', email: null }
@@ -89,7 +89,7 @@ function Shell({ user }) {
         {tab === 'today' && <Today />}
         {tab === 'weight' && <Weight />}
         {tab === 'workout' && <Workout />}
-        {tab === 'settings' && <Settings user={user} />}
+        {tab === 'profile' && <Profile user={user} />}
       </main>
       <TabBar tab={tab} onChange={setTab} />
     </StoreContext.Provider>

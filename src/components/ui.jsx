@@ -139,7 +139,7 @@ const ICONS = {
   today: 'M4 11h16M7 4v7M12 4v7M17 4v7M6 11v6a3 3 0 003 3h6a3 3 0 003-3v-6',
   weight: 'M4 17l5-5 4 3 7-8M15 7h5v5',
   workout: 'M3 12h3M18 12h3M6 7v10M9 5v14M15 5v14M18 7v10M9 12h6',
-  settings: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
+  profile: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 20a7.5 7.5 0 0115 0',
 }
 
 export function TabBar({ tab, onChange }) {
@@ -147,7 +147,7 @@ export function TabBar({ tab, onChange }) {
     ['today', 'Today'],
     ['weight', 'Weight'],
     ['workout', 'Workout'],
-    ['settings', 'Settings'],
+    ['profile', 'Profile'],
   ]
   return (
     <nav className="tabbar" aria-label="Sections">

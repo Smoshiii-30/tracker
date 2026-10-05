@@ -51,11 +51,11 @@ In Supabase, add your Vercel URL under **Authentication â†’ URL Configuration â†
 
 | Path | What it is |
 | --- | --- |
-| `src/pages/` | The four screens plus sign-in |
+| `src/pages/` | Today, Weight, Workout and Profile, plus sign-in |
 | `src/lib/store.js` | Local-first data store and sync queue |
 | `src/lib/program.js` | The workout program: edit exercises, sets and rep ranges here |
 | `src/lib/foods.js` | The one-tap staples and their nutrition values |
-| `src/styles.css` | All styling, with color tokens for light and dark at the top |
+| `src/styles.css` | All styling, with the grayscale tokens for light and dark at the top |
 | `supabase/schema.sql` | Database tables and row-level security |
 | `supabase/functions/analyze-food/` | The photo analysis function |
 | `tests/store.test.js` | Tests for offline saving and sync (`npm test`) |
@@ -64,4 +64,6 @@ In Supabase, add your Vercel URL under **Authentication â†’ URL Configuration â†
 
 Every change is written to the device first and added to a queue. The queue is sent to Supabase whenever the app opens, comes back to the foreground, or regains a connection. After the queue is empty the app reads the last 120 days back from the server, which is how changes from another device arrive. If the same row is edited on two devices, the last one to sync wins.
 
-Daily targets default to 2,150 kcal and 150 g protein. Change them in Settings.
+Daily targets default to 2,150 kcal and 150 g protein. Change them on the Profile tab, along with your name and goal weight.
+
+If you set up Supabase before the Profile tab existed, run [`supabase/schema.sql`](supabase/schema.sql) again. It adds the `display_name`, `goal_kg` and `avatar` columns without touching your data.

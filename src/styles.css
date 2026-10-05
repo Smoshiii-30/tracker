@@ -1,38 +1,35 @@
-/* Tokens. Chart and meter colors are checked for colorblind separation and
-   contrast against each theme's surface, so change them as a set. */
+/* Tokens. The palette is grayscale on purpose: hierarchy comes from weight,
+   size and contrast, and "over target" is marked with a stripe pattern
+   instead of a color. */
 :root {
-  --bg: #eef1f0;
+  --bg: #f6f6f6;
   --surface: #ffffff;
-  --ink: #17232b;
-  --ink-2: #51626c;
-  --line: #d6dde0;
-  --track: #e1e7e9;
-  --cal: #d9790b;
-  --pro: #1f9e7a;
-  --blue: #2f7fb8;
-  --over: #b93a25;
-  --btn: #17232b;
-  --btn-ink: #f4f6f5;
+  --ink: #111111;
+  --ink-2: #6e6e6e;
+  --ink-3: #a8a8a8;
+  --line: #e4e4e4;
+  --track: #ebebeb;
+  --btn: #111111;
+  --btn-ink: #ffffff;
+  --stripe: repeating-linear-gradient(-45deg, var(--ink) 0 4px, var(--ink-3) 4px 8px);
   --font: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --num: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  --radius: 12px;
   --tabbar: 64px;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121a20;
-    --surface: #1b262e;
-    --ink: #e8edef;
-    --ink-2: #9aaab4;
-    --line: #2c3a44;
-    --track: #27343d;
-    --cal: #cf7a14;
-    --pro: #27a583;
-    --blue: #3f8fcc;
-    --over: #ec7a61;
-    --btn: #e8edef;
-    --btn-ink: #121a20;
+    --bg: #0b0b0b;
+    --surface: #161616;
+    --ink: #f2f2f2;
+    --ink-2: #9b9b9b;
+    --ink-3: #5c5c5c;
+    --line: #262626;
+    --track: #232323;
+    --btn: #f2f2f2;
+    --btn-ink: #0b0b0b;
   }
 }
 
@@ -79,7 +76,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
@@ -180,7 +177,7 @@ h2 {
 
 .hero-num {
   font: 700 clamp(5rem, 27vw, 7.5rem) / 0.86 var(--num);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -201,7 +198,10 @@ h2 {
 }
 
 .over-text {
-  color: var(--over);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
 }
 
 /* Meters */
@@ -233,7 +233,7 @@ h2 {
 
 .meter-track {
   position: relative;
-  height: 14px;
+  height: 8px;
   border-radius: 4px;
   background: var(--track);
   overflow: hidden;
@@ -244,16 +244,12 @@ h2 {
   border-radius: 0 4px 4px 0;
 }
 
-.meter-track.cal .meter-fill {
-  background: var(--cal);
-}
-
-.meter-track.pro .meter-fill {
-  background: var(--pro);
+.meter-fill {
+  background: var(--ink);
 }
 
 .meter-track .meter-fill.over {
-  background: var(--over);
+  background: var(--stripe);
 }
 
 .meter-tick {
@@ -276,8 +272,8 @@ h2 {
 .btn {
   min-height: 48px;
   padding: 0 18px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--surface);
   font-weight: 600;
 }
@@ -289,7 +285,7 @@ h2 {
 }
 
 .btn.danger {
-  color: var(--over);
+  border-color: var(--ink);
 }
 
 .btn.link {
@@ -329,8 +325,8 @@ h2 {
   width: 100%;
   min-height: 48px;
   padding: 0 12px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--surface);
   font-size: 1rem;
 }
@@ -348,26 +344,26 @@ h2 {
 
 .field:focus-visible {
   outline-offset: 0;
-  border-color: var(--blue);
+  border-color: var(--ink);
 }
 
 .notice {
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--track);
   font-size: 0.9375rem;
 }
 
 .notice.error {
-  background: color-mix(in srgb, var(--over) 12%, var(--surface));
+  background: var(--track);
   color: var(--ink);
-  border-left: 3px solid var(--over);
+  border-left: 3px solid var(--ink);
 }
 
 .empty {
   padding: 18px 14px;
-  border: 1.5px dashed var(--line);
-  border-radius: 10px;
+  border: 1px dashed var(--ink-3);
+  border-radius: var(--radius);
   color: var(--ink-2);
 }
 
@@ -391,7 +387,7 @@ h2 {
 .chip {
   min-height: 40px;
   padding: 0 14px;
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--surface);
   font-size: 0.9375rem;
@@ -407,9 +403,9 @@ h2 {
 /* Lists */
 
 .list {
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface);
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--line);
   overflow: hidden;
 }
 
@@ -462,7 +458,7 @@ h2 {
 .segmented {
   display: inline-flex;
   padding: 3px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--track);
   gap: 2px;
 }
@@ -505,8 +501,8 @@ h2 {
 
 .chart {
   padding: 12px 8px 4px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--surface);
 }
 
@@ -534,7 +530,7 @@ h2 {
 }
 
 .chart .dot {
-  fill: var(--blue);
+  fill: var(--ink-3);
 }
 
 .chart .dot.ringed {
@@ -544,8 +540,8 @@ h2 {
 
 .chart .avg {
   fill: none;
-  stroke: var(--cal);
-  stroke-width: 2;
+  stroke: var(--ink);
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -592,8 +588,8 @@ h2 {
 
 .exercise {
   padding: 14px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--surface);
   gap: 8px !important;
 }
@@ -614,7 +610,7 @@ h2 {
 .nudge {
   font-weight: 500;
   padding-left: 10px;
-  border-left: 3px solid var(--pro);
+  border-left: 3px solid var(--ink);
 }
 
 .set-row {
@@ -652,7 +648,7 @@ h2 {
 }
 
 .sheet::backdrop {
-  background: rgb(10 16 20 / 0.55);
+  background: rgb(0 0 0 / 0.55);
 }
 
 .sheet-body {
@@ -702,7 +698,7 @@ h2 {
 .working {
   height: 6px;
   border-radius: 3px;
-  background: var(--cal);
+  background: var(--ink);
   transform-origin: left;
 }
 
@@ -716,8 +712,9 @@ h2 {
 .photo-head img {
   width: 88px;
   height: 88px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   object-fit: cover;
+  filter: grayscale(1);
 }
 
 .photo-items {
@@ -741,7 +738,7 @@ h2 {
   width: 22px;
   height: 22px;
   margin: 13px 0 0;
-  accent-color: var(--pro);
+  accent-color: var(--ink);
 }
 
 .photo-fields {
@@ -764,6 +761,137 @@ h2 {
 
 .photo-macros b {
   color: var(--ink);
+}
+
+/* Profile */
+
+.profile {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font: 700 1.625rem/1 var(--num);
+  letter-spacing: 0.02em;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(1);
+}
+
+.avatar.large {
+  width: 88px;
+  height: 88px;
+  font-size: 2.125rem;
+}
+
+.avatar-edit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-text {
+  min-width: 0;
+}
+
+.profile-name {
+  font: 600 1.375rem/1.2 var(--font);
+  overflow-wrap: anywhere;
+}
+
+.small-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+}
+
+.stat:nth-child(n + 4) {
+  border-top: 1px solid var(--line);
+}
+
+.stat:not(:nth-child(3n + 1)) {
+  border-left: 1px solid var(--line);
+}
+
+.stat-label {
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font: 600 1.75rem/1.1 var(--num);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-unit {
+  margin-left: 3px;
+  color: var(--ink-2);
+  font-size: 0.55em;
+}
+
+.goal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.goal-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: var(--ink);
+}
+
+.goal-ends {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Tab bar */
@@ -802,7 +930,7 @@ h2 {
 }
 
 .tab.active svg {
-  color: var(--cal);
+  stroke-width: 2.2;
 }
 
 /* Sign in */

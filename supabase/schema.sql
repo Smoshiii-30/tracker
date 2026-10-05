@@ -9,6 +9,12 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+-- Profile details added later. Safe to run on an existing project.
+alter table public.profiles add column if not exists display_name text check (char_length(display_name) between 1 and 60);
+alter table public.profiles add column if not exists goal_kg numeric check (goal_kg between 20 and 400);
+-- A small square JPEG as a data URL, about 10 KB.
+alter table public.profiles add column if not exists avatar text check (char_length(avatar) <= 60000);
+
 create table if not exists public.meals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
