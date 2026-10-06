@@ -613,6 +613,48 @@ h2 {
   font-size: 0.9375rem;
 }
 
+/* Weekly check-in and maintenance */
+
+.check-in {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.check-in-rows {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.check-in-rows div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.check-in-rows dt {
+  color: var(--ink-2);
+}
+
+.check-in-rows dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.suggest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}
+
 .nudge {
   font-weight: 500;
   padding-left: 10px;

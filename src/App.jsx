@@ -86,8 +86,8 @@ function Shell({ user }) {
   return (
     <StoreContext.Provider value={store}>
       <main className="app">
-        {tab === 'today' && <Today />}
-        {tab === 'weight' && <Weight />}
+        {tab === 'today' && <Today onOpenWeight={() => setTab('weight')} />}
+        {tab === 'weight' && <Weight user={user} />}
         {tab === 'workout' && <Workout />}
         {tab === 'profile' && <Profile user={user} />}
       </main>

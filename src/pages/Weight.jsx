@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { newId, useData, useTargets } from '../lib/data'
-import { addDays, formatDay, toKey } from '../lib/dates'
+import { fmt, newId, useData, useTargets } from '../lib/data'
+import { addDays, formatDay, formatShort, toKey } from '../lib/dates'
+import { estimateMaintenance } from '../lib/insights'
 import { NumField } from '../components/ui'
 import WeightChart from '../components/WeightChart'
 
@@ -23,7 +24,7 @@ function pace(entries, today, calorieTarget) {
   return { change, advice }
 }
 
-export default function Weight() {
+export default function Weight({ user }) {
   const { state, store } = useData()
   const targets = useTargets()
   const today = toKey()
@@ -52,6 +53,28 @@ export default function Weight() {
   const week = entries.filter((e) => e.date >= addDays(today, -6) && e.date <= today)
   const trend = pace(entries, today, targets.calorie_target)
   const valid = kg != null && kg >= 20 && kg <= 400
+  const profile = state.profiles[0] ?? {}
+  const estimate = useMemo(
+    () =>
+      estimateMaintenance({
+        meals: state.meals,
+        weights: state.weights,
+        today,
+        goalKg: profile.goal_kg != null ? Number(profile.goal_kg) : null,
+      }),
+    [state.meals, state.weights, today, profile.goal_kg],
+  )
+
+  // Sends the whole row, like the Profile screen, so no other field is blanked.
+  function applyTarget(calories) {
+    store.upsert('profiles', {
+      calorie_target: targets.calorie_target,
+      protein_target: targets.protein_target,
+      ...profile,
+      id: user.id,
+      calorie_target: calories,
+    })
+  }
 
   function save(event) {
     event.preventDefault()
@@ -96,6 +119,8 @@ export default function Weight() {
           <p className="trend muted">Weigh in at least 3 mornings a week and your weekly pace shows up here.</p>
         )}
       </section>
+
+      <Maintenance estimate={estimate} target={targets.calorie_target} onUse={applyTarget} />
 
       <form className="weigh-form" onSubmit={save}>
         <label className="label">
@@ -157,5 +182,49 @@ export default function Weight() {
         </section>
       )}
     </>
+  )
+}
+
+function Maintenance({ estimate, target, onUse }) {
+  if (!estimate.ready) {
+    return (
+      <section>
+        <h2>Your maintenance</h2>
+        <p className="empty">
+          {estimate.unclear
+            ? 'Your logged food and your weigh-ins do not add up yet, so there is no estimate. Log every meal for a full week and it should settle.'
+            : `Log your food and weigh in for about two weeks and your real maintenance calories show up here. So far: ${estimate.loggedDays} of ${estimate.needDays} fully logged days and ${estimate.weighIns} of ${estimate.needWeighIns} weigh-ins in the last 3 weeks.`}
+        </p>
+      </section>
+    )
+  }
+
+  const { maintenance, intake, weekly, suggested, goalOn, loggedDays } = estimate
+  const pace = Math.abs(weekly) < 0.05 ? 'holding steady' : `${weekly < 0 ? 'losing' : 'gaining'} ${Math.abs(weekly).toFixed(1)} kg a week`
+  const differs = Math.abs(suggested - target) >= 100
+
+  return (
+    <section>
+      <h2>Your maintenance</h2>
+      <p className="readout">
+        <b>About {fmt(maintenance)} kcal</b> a day keeps your weight steady.
+      </p>
+      <p className="muted small">
+        From the last 3 weeks: you ate {fmt(intake)} kcal on an average logged day ({loggedDays} days) and are {pace}.
+      </p>
+      {differs ? (
+        <div className="suggest">
+          <p>
+            For a steady 0.5 kg a week, aim for <b>{fmt(suggested)} kcal</b> instead of {fmt(target)}.
+          </p>
+          <button type="button" className="btn small-btn" onClick={() => onUse(suggested)}>
+            Use {fmt(suggested)}
+          </button>
+        </div>
+      ) : (
+        <p className="nudge">Your {fmt(target)} kcal target fits a steady 0.5 kg a week.</p>
+      )}
+      {goalOn && <p className="muted small">At this pace you reach your goal weight around {formatShort(goalOn)}.</p>}
+    </section>
   )
 }

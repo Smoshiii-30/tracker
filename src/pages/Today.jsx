@@ -1,14 +1,25 @@
 import { useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { fmt, newId, round1, useData, useTargets } from '../lib/data'
-import { toKey } from '../lib/dates'
+import { formatShort, fromKey, toKey } from '../lib/dates'
+import { estimateMaintenance, lastWeekStart, weekReview } from '../lib/insights'
 import { STAPLES, portion } from '../lib/foods'
 import { toJpeg } from '../lib/image'
 import { DayNav, Meter, NumField, Sheet } from '../components/ui'
 
+const CHECK_IN_KEY = 'checkin-dismissed'
+
+function readDismissed() {
+  try {
+    return localStorage.getItem(CHECK_IN_KEY)
+  } catch {
+    return null
+  }
+}
+
 const byLogged = (a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0)
 
-export default function Today() {
+export default function Today({ onOpenWeight }) {
   const { state, store } = useData()
   const targets = useTargets()
   const [day, setDay] = useState(toKey())
@@ -87,6 +98,31 @@ export default function Today() {
 
   const left = targets.calorie_target - totals.calories
 
+  // The check-in for last week shows Monday to Wednesday, until dismissed.
+  const today = toKey()
+  const weekStart = lastWeekStart(today)
+  const [dismissed, setDismissed] = useState(() => readDismissed())
+  const showCheckIn = day === today && fromKey(today).getDay() >= 1 && fromKey(today).getDay() <= 3 && dismissed !== weekStart
+  const review = useMemo(
+    () =>
+      showCheckIn
+        ? {
+            ...weekReview({ meals: state.meals, weights: state.weights, sets: state.workout_sets, targets, start: weekStart }),
+            estimate: estimateMaintenance({ meals: state.meals, weights: state.weights, today }),
+          }
+        : null,
+    [showCheckIn, state.meals, state.weights, state.workout_sets, targets, weekStart, today],
+  )
+
+  function dismissCheckIn() {
+    setDismissed(weekStart)
+    try {
+      localStorage.setItem(CHECK_IN_KEY, weekStart)
+    } catch {
+      // Private browsing: it just shows again next time.
+    }
+  }
+
   return (
     <>
       <DayNav day={day} onChange={setDay} />
@@ -109,6 +145,10 @@ export default function Today() {
           </p>
         )}
       </section>
+
+      {review && review.loggedDays > 0 && (
+        <CheckIn review={review} onOpenWeight={onOpenWeight} onDismiss={dismissCheckIn} />
+      )}
 
       <div className="actions">
         <button type="button" className="btn primary wide" onClick={() => setSheet({ kind: 'manual' })}>
@@ -496,5 +536,57 @@ function PhotoSheet({ sheet, onChange, onRetry, onClose, onSave }) {
         </button>
       </div>
     </Sheet>
+  )
+}
+
+function CheckIn({ review, onOpenWeight, onDismiss }) {
+  const { start, end, loggedDays, avgCalories, calorieTarget, proteinDays, weightChange, workouts, estimate } = review
+  const diff = avgCalories - calorieTarget
+  const rows = [
+    ['Average eaten', `${fmt(avgCalories)} kcal`, Math.abs(diff) < 50 ? 'on target' : `${fmt(Math.abs(diff))} ${diff > 0 ? 'over' : 'under'}`],
+    ['Protein target hit', `${proteinDays} of ${loggedDays} days`, null],
+    [
+      'Weight',
+      weightChange == null ? '–' : `${weightChange > 0 ? '+' : weightChange < 0 ? '−' : ''}${Math.abs(weightChange).toFixed(1)} kg`,
+      weightChange == null ? 'needs weigh-ins both weeks' : 'against the week before',
+    ],
+    ['Workouts', String(workouts), null],
+  ]
+
+  return (
+    <section className="check-in" aria-label="Last week">
+      <div className="section-head">
+        <h2>
+          Last week <span className="muted small">{formatShort(start)}–{formatShort(end)}</span>
+        </h2>
+        <button type="button" className="icon-btn" aria-label="Hide last week's check-in" onClick={onDismiss}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+      <dl className="check-in-rows">
+        {rows.map(([label, value, note]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>
+              <b>{value}</b>
+              {note && <span className="muted small"> {note}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {loggedDays < 7 && <p className="muted small">Based on {loggedDays} logged {loggedDays === 1 ? 'day' : 'days'}.</p>}
+      {estimate.ready && Math.abs(estimate.suggested - calorieTarget) >= 100 && (
+        <div className="suggest">
+          <p>
+            Your maintenance looks like about {fmt(estimate.maintenance)} kcal. A steady cut is around <b>{fmt(estimate.suggested)} kcal</b>.
+          </p>
+          <button type="button" className="btn small-btn" onClick={onOpenWeight}>
+            Review
+          </button>
+        </div>
+      )}
+    </section>
   )
 }
