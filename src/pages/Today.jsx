@@ -14,6 +14,7 @@ export default function Today() {
   const [day, setDay] = useState(toKey())
   const [sheet, setSheet] = useState(null)
   const fileInput = useRef(null)
+  const cameraInput = useRef(null)
 
   const meals = useMemo(() => state.meals.filter((m) => m.eaten_on === day).sort(byLogged), [state.meals, day])
 
@@ -74,6 +75,16 @@ export default function Today() {
     }
   }
 
+  function pickPhoto(input) {
+    if (supabase) input.current.click()
+    else setSheet({ kind: 'photo', status: 'unavailable' })
+  }
+
+  function onPhoto(event) {
+    analyze(event.target.files[0])
+    event.target.value = ''
+  }
+
   const left = targets.calorie_target - totals.calories
 
   return (
@@ -100,27 +111,18 @@ export default function Today() {
       </section>
 
       <div className="actions">
-        <button type="button" className="btn primary" onClick={() => setSheet({ kind: 'manual' })}>
+        <button type="button" className="btn primary wide" onClick={() => setSheet({ kind: 'manual' })}>
           Add food
         </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => (supabase ? fileInput.current.click() : setSheet({ kind: 'photo', status: 'unavailable' }))}
-        >
-          Scan a photo
+        <button type="button" className="btn" onClick={() => pickPhoto(cameraInput)}>
+          Take photo
         </button>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          onChange={(event) => {
-            analyze(event.target.files[0])
-            event.target.value = ''
-          }}
-        />
+        <button type="button" className="btn" onClick={() => pickPhoto(fileInput)}>
+          Upload photo
+        </button>
+        {/* capture opens the camera directly; without it the phone offers its gallery and files. */}
+        <input ref={cameraInput} type="file" accept="image/*" capture="environment" hidden onChange={onPhoto} />
+        <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPhoto} />
       </div>
 
       <section>
