@@ -765,6 +765,17 @@ h2 {
   color: var(--ink);
 }
 
+/* An estimated weight reads as a guess until the user types their own. */
+.photo-macros.guess,
+.photo-macros.guess b {
+  color: var(--ink-2);
+  font-style: italic;
+}
+
+.photo-line .field::placeholder {
+  color: var(--ink-2);
+}
+
 /* Profile */
 
 .profile {

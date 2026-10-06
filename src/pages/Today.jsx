@@ -67,8 +67,8 @@ export default function Today() {
         body: { image: base64, mime: 'image/jpeg' },
       })
       if (error) throw error
-      const items = (data.items || []).map((item) => ({ ...item, id: newId(), on: true, base: item }))
-      setSheet({ kind: 'photo', status: 'review', preview, items, note: data.note })
+      const items = (data.ingredients || []).map((item) => ({ ...item, id: newId(), on: true }))
+      setSheet({ kind: 'photo', status: 'review', preview, dish: data.dish || '', items, note: data.note })
     } catch (error) {
       setSheet({ kind: 'photo', status: 'error', message: await explain(error) })
     }
@@ -348,14 +348,20 @@ function StapleForm({ food, onClose, onSave }) {
   )
 }
 
-function scaled(item) {
-  const k = item.base.grams > 0 && item.grams != null ? item.grams / item.base.grams : 1
+// An ingredient uses the weight the user typed, or the photo's estimate until
+// they do. Estimated weights are saved with a "~" so they stay recognisable.
+function scaled(item, dish = '') {
+  const weighed = item.weight_grams != null
+  const grams = weighed ? item.weight_grams : item.estimated_grams
+  const k = grams / 100
+  const prefix = dish.trim() ? `${dish.trim()}: ` : ''
   return {
-    name: item.grams ? `${item.name} (${item.grams} g)` : item.name,
-    calories: item.base.calories * k,
-    protein: item.base.protein * k,
-    carbs: item.base.carbs * k,
-    fat: item.base.fat * k,
+    name: `${prefix}${item.name.trim()} (${weighed ? '' : '~'}${grams} g)`,
+    calories: item.per_100g.calories * k,
+    protein: item.per_100g.protein * k,
+    carbs: item.per_100g.carbs * k,
+    fat: item.per_100g.fat * k,
+    weighed,
   }
 }
 
@@ -395,17 +401,35 @@ function PhotoSheet({ sheet, onChange, onRetry, onClose, onSave }) {
   const update = (id, patch) =>
     onChange({ ...sheet, items: sheet.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) })
   const chosen = sheet.items.filter((item) => item.on && item.name.trim())
+  const total = chosen.reduce((sum, item) => sum + scaled(item).calories, 0)
+  const guessed = chosen.filter((item) => item.weight_grams == null).length
 
   return (
-    <Sheet title="Check the estimate" onClose={onClose}>
+    <Sheet title="Weigh the ingredients" onClose={onClose}>
       <div className="stack">
         <div className="photo-head">
           <img src={sheet.preview} alt="Your meal" />
           <p className="muted small">
-            A photo can name the food but only guesses the portion, and it cannot see cooking oil. Fix the grams if you
-            weighed it. {sheet.note}
+            Each ingredient is listed on its own. Type the grams you weighed; a blank field uses the photo&apos;s guess,
+            shown in grey. {sheet.note}
           </p>
         </div>
+
+        {sheet.items.length > 0 && (
+          <label className="label">
+            <span>
+              Dish <span className="muted">optional, added before each ingredient</span>
+            </span>
+            <input
+              className="field"
+              type="text"
+              maxLength={60}
+              placeholder="Sinigang na baboy"
+              value={sheet.dish}
+              onChange={(e) => onChange({ ...sheet, dish: e.target.value })}
+            />
+          </label>
+        )}
 
         {sheet.items.length === 0 ? (
           <p className="empty">No food was recognised in this photo.</p>
@@ -425,8 +449,8 @@ function PhotoSheet({ sheet, onChange, onRetry, onClose, onSave }) {
                     <input
                       className="field"
                       type="text"
-                      aria-label="Food name"
-                      maxLength={100}
+                      aria-label="Ingredient name"
+                      maxLength={80}
                       value={item.name}
                       onChange={(e) => update(item.id, { name: e.target.value })}
                     />
@@ -434,11 +458,12 @@ function PhotoSheet({ sheet, onChange, onRetry, onClose, onSave }) {
                       <NumField
                         decimals={false}
                         aria-label={`${item.name} weight in grams`}
-                        value={item.grams}
-                        onCommit={(grams) => update(item.id, { grams })}
+                        placeholder={`~${item.estimated_grams}`}
+                        value={item.weight_grams}
+                        onCommit={(weight_grams) => update(item.id, { weight_grams })}
                       />
                       <span className="unit">g</span>
-                      <span className="photo-macros">
+                      <span className={now.weighed ? 'photo-macros' : 'photo-macros guess'}>
                         <b>{fmt(now.calories)}</b> kcal, <b>{round1(now.protein)}</b> g protein
                       </span>
                     </div>
@@ -449,8 +474,20 @@ function PhotoSheet({ sheet, onChange, onRetry, onClose, onSave }) {
           </ul>
         )}
 
-        <button type="button" className="btn primary" disabled={chosen.length === 0} onClick={() => onSave(chosen.map(scaled))}>
-          {chosen.length === 1 ? 'Add 1 food' : `Add ${chosen.length} foods`}
+        {chosen.length > 0 && (
+          <p className="readout" aria-live="polite">
+            <b>{fmt(total)}</b> kcal in total
+            {guessed > 0 && <span className="muted">, {guessed === 1 ? '1 weight' : `${guessed} weights`} still estimated</span>}
+          </p>
+        )}
+
+        <button
+          type="button"
+          className="btn primary"
+          disabled={chosen.length === 0}
+          onClick={() => onSave(chosen.map((item) => scaled(item, sheet.dish)))}
+        >
+          {chosen.length === 1 ? 'Add 1 ingredient' : `Add ${chosen.length} ingredients`}
         </button>
         <button type="button" className="btn" onClick={onRetry}>
           Take another photo

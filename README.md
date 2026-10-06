@@ -37,7 +37,7 @@ npx supabase secrets set GEMINI_API_KEY=your-key
 npx supabase functions deploy analyze-food
 ```
 
-The project ref is the random part of your project URL. The function uses `gemini-3.8-flash`; set a `GEMINI_MODEL` secret to use a different model.
+The project ref is the random part of your project URL. The function tries `gemini-3.8-flash`, then `gemini-3.6-flash`, then `gemini-3.5-flash-lite` when a model is busy or at its free limit. Set a `GEMINI_MODEL` secret to put a different model first.
 
 Photo estimates are a starting point. The model names foods well but guesses portions and cannot see cooking oil, so the app always shows the result for you to correct before saving.
 
